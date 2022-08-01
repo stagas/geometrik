@@ -1,5 +1,5 @@
 <h1>
-geometrik <a href="https://npmjs.org/package/geometrik"><img src="https://img.shields.io/badge/npm-v0.0.1-F00.svg?colorA=000"/></a> <a href="src"><img src="https://img.shields.io/badge/loc-1,341-FFF.svg?colorA=000"/></a> <a href="https://cdn.jsdelivr.net/npm/geometrik@0.0.1/dist/geometrik.min.js"><img src="https://img.shields.io/badge/brotli-4.5K-333.svg?colorA=000"/></a> <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-F0B.svg?colorA=000"/></a>
+geometrik <a href="https://npmjs.org/package/geometrik"><img src="https://img.shields.io/badge/npm-v1.0.0-F00.svg?colorA=000"/></a> <a href="src"><img src="https://img.shields.io/badge/loc-1,341-FFF.svg?colorA=000"/></a> <a href="https://cdn.jsdelivr.net/npm/geometrik@1.0.0/dist/geometrik.min.js"><img src="https://img.shields.io/badge/brotli-4.6K-333.svg?colorA=000"/></a> <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-F0B.svg?colorA=000"/></a>
 </h1>
 
 <p></p>
