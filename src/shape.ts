@@ -212,6 +212,16 @@ export abstract class Shape {
 
   touchPoint(this: this, other: Rect, center = (this as unknown as Rect).center ?? this): Point {
     const self = this instanceof Rect ? this : new Point(1, 1)
+    const i = this.intersectPoint(other, center).translateSelf(other.center)
+
+    const x = i.x - self.width * 0.5
+    const y = i.y - self.height * 0.5
+
+    return new Point(x, y)
+  }
+
+  intersectPoint(this: this, other: Rect, center = (this as unknown as Rect).center ?? this): Point {
+    const self = this instanceof Rect ? this : new Point(1, 1)
     const w = (self.width + other.width) * 0.5
     const h = (self.height + other.height) * 0.5
     const d = center.screen(other.center)
@@ -227,17 +237,14 @@ export abstract class Shape {
     let xI, yI
 
     if (tan_theta > tan_phi) {
-      xI = other.center.x + (h / tan_theta) * qx
-      yI = other.center.y + h * qy
+      xI = (h / tan_theta) * qx
+      yI = h * qy
     } else {
-      xI = other.center.x + w * qx
-      yI = other.center.y + w * tan_theta * qy
+      xI = w * qx
+      yI = w * tan_theta * qy
     }
 
-    const x = xI - self.width * 0.5
-    const y = yI - self.height * 0.5
-
-    return new Point(x, y)
+    return new Point(xI, yI)
   }
 
   toStylePosition(): Partial<CSSStyleDeclaration> {

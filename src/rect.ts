@@ -338,10 +338,34 @@ export class Rect extends Shape implements DOMRect {
       && this.bottom <= other.bottom
   }
 
-  getCollisionResponse(this: this, other: Rect): Point {
-    const x = (other.x + other.width * 0.5) - (this.x + this.width * 0.5)
-    const y = (other.y + other.height * 0.5) - (this.y + this.height * 0.5)
-    return new Point(x, y)
+  distanceRect(this: this, other: Rect): Point {
+    let dx = 0
+    let dy = 0
+
+    if (this.right < other.left) {
+      dx = other.left - this.right
+    } else if (this.left > other.right) {
+      dx = this.left - other.right
+    } else {
+      dx = Math.abs(this.center.x - other.center.x)
+    }
+
+    if (this.bottom < other.top) {
+      dy = other.top - this.bottom
+    } else if (this.top > other.bottom) {
+      dy = this.top - other.bottom
+    } else {
+      dy = Math.abs(this.center.y - other.center.y)
+    }
+
+    return new Point(dx, dy)
+  }
+
+  collisionResponse(this: this, other: Rect): Point {
+    return this
+      .intersectPoint(other)
+      .addSelf(other.center)
+      .subSelf(this.center)
   }
 
   place(this: this, other: Rect, placement: Placement) {
