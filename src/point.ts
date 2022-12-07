@@ -31,6 +31,10 @@ export class Point extends Shape {
     return Point.fromAngle(Scalar.degreesToRadians(degrees))
   }
 
+  static compare(a: Point | void, b: Point) {
+    return a?.equals(b) ?? false
+  }
+
   x!: number
   y!: number
 
@@ -149,12 +153,30 @@ export class Point extends Shape {
     return (d.x < d.y) ? F * d.x + d.y : F * d.y + d.x
   }
 
+  /** Returns the maximum of its values. */
   max(this: this) {
     return Math.max(this.x, this.y)
   }
 
+  /** Returns the minumum of its values. */
   min(this: this) {
     return Math.min(this.x, this.y)
+  }
+
+  clampSelf(this: this, min: number, max: number) {
+    if (this.x < min) this.x = min
+    else if (this.x > max) this.x = max
+
+    if (this.y < min) this.y = min
+    else if (this.y > max) this.y = max
+
+    return this
+  }
+
+  clampMinSelf(this: this, min: number) {
+    if (this.x < min) this.x = min
+    if (this.y < min) this.y = min
+    return this
   }
 
   chebyshev(this: this, other: Point) {
@@ -170,7 +192,7 @@ export class Point extends Shape {
   }
 
   mag(this: this) {
-    return Math.sqrt(this.square().sum())
+    return Math.hypot(this.x, this.y)
   }
 
   length(this: this) {
@@ -224,6 +246,8 @@ export class Point extends Shape {
     return Math.abs(this.x) + Math.abs(this.y)
   }
 
+  declare absSum: this['absoluteSum']
+
   withinRect(this: this, other: Rect): boolean {
     return this.x >= other.left
       && this.x <= other.right
@@ -262,19 +286,24 @@ export class Point extends Shape {
 
   normalize(this: this, other: DOMMatrix): InstanceType<Class<typeof this>>
   normalize(this: this, other: Point): InstanceType<Class<typeof this>>
+  normalize(this: this, other: Rect): InstanceType<Class<typeof this>>
   normalize(this: this, x: number, y?: number): InstanceType<Class<typeof this>>
   normalize(this: this): InstanceType<Class<typeof this>>
-  normalize(this: this, x?: number | Point | DOMMatrix, y: number = x as number) {
+  normalize(this: this, x?: number | Point | Rect | DOMMatrix, y: number = x as number) {
     return this.clone().normalizeSelf(x as number, y as number)
   }
   normalizeSelf(this: this, other: DOMMatrix): InstanceType<Class<typeof this>>
   normalizeSelf(this: this, other: Point): InstanceType<Class<typeof this>>
+  normalizeSelf(this: this, other: Rect): InstanceType<Class<typeof this>>
   normalizeSelf(this: this, x: number, y?: number): InstanceType<Class<typeof this>>
   normalizeSelf(this: this): InstanceType<Class<typeof this>>
-  normalizeSelf(this: this, x: number | Point | DOMMatrix = this.mag(), y: number = x as number) {
+  normalizeSelf(this: this, x: number | Point | Rect | DOMMatrix = this.mag(), y: number = x as number) {
     if (x instanceof DOMMatrix) {
       this.x = (this.x - x.e) / x.a
       this.y = (this.y - x.f) / x.d
+    } else if (x instanceof Rect) {
+      this.x = (this.x - x.x) / x.width
+      this.y = (this.y - x.y) / x.height
     } else if (typeof x === 'number') {
       this.x /= x
       this.y /= y
@@ -293,3 +322,5 @@ export class Point extends Shape {
     return this.x === other.x || this.y === other.y
   }
 }
+
+Point.prototype.absSum = Point.prototype.absoluteSum

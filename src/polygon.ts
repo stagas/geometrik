@@ -27,6 +27,24 @@ export class Polygon {
     }, new Point())
   }
 
+  static absSum(points: Point[]) {
+    return points.reduce((p, n) => {
+      p.x += Math.abs(n.x)
+      p.y += Math.abs(n.y)
+      return p
+    }, new Point())
+  }
+
+  static screen(a: Point[], b: Point[]) {
+    return a.map((x, i) => x.screen(b[i]))
+  }
+
+  static mag(points: Point[]) {
+    return points.reduce((p, n) => {
+      return p + n.mag()
+    }, 0)
+  }
+
   static rope(points: Point[], coeff = 1) {
     const from = points[0].clone()
     const to = points.at(-1)!.clone()
@@ -155,16 +173,16 @@ export class Polygon {
     // dprint-ignore
     const x = p2.x + 0.04166666666 * t * ((p3.x - p1.x) * 16.0 + (p0.x - p4.x) * 2.0
       + t * ((p3.x + p1.x) * 16.0 - p0.x - p2.x * 30.0 - p4.x
-      + t * (p3.x * 66.0 - p2.x * 70.0 - p4.x * 33.0 + p1.x * 39.0 + p5.x * 7.0 - p0.x * 9.0
-      + t * (p2.x * 126.0 - p3.x * 124.0 + p4.x * 61.0 - p1.x * 64.0 - p5.x * 12.0 + p0.x * 13.0
-      + t * ((p3.x - p2.x) * 50.0 + (p1.x - p4.x) * 25.0 + (p5.x - p0.x) * 5.0)))))
+        + t * (p3.x * 66.0 - p2.x * 70.0 - p4.x * 33.0 + p1.x * 39.0 + p5.x * 7.0 - p0.x * 9.0
+          + t * (p2.x * 126.0 - p3.x * 124.0 + p4.x * 61.0 - p1.x * 64.0 - p5.x * 12.0 + p0.x * 13.0
+            + t * ((p3.x - p2.x) * 50.0 + (p1.x - p4.x) * 25.0 + (p5.x - p0.x) * 5.0)))))
 
     // dprint-ignore
     const y = p2.y + 0.04166666666 * t * ((p3.y - p1.y) * 16.0 + (p0.y - p4.y) * 2.0
       + t * ((p3.y + p1.y) * 16.0 - p0.y - p2.y * 30.0 - p4.y
-      + t * (p3.y * 66.0 - p2.y * 70.0 - p4.y * 33.0 + p1.y * 39.0 + p5.y * 7.0 - p0.y * 9.0
-      + t * (p2.y * 126.0 - p3.y * 124.0 + p4.y * 61.0 - p1.y * 64.0 - p5.y * 12.0 + p0.y * 13.0
-      + t * ((p3.y - p2.y) * 50.0 + (p1.y - p4.y) * 25.0 + (p5.y - p0.y) * 5.0)))))
+        + t * (p3.y * 66.0 - p2.y * 70.0 - p4.y * 33.0 + p1.y * 39.0 + p5.y * 7.0 - p0.y * 9.0
+          + t * (p2.y * 126.0 - p3.y * 124.0 + p4.y * 61.0 - p1.y * 64.0 - p5.y * 12.0 + p0.y * 13.0
+            + t * ((p3.y - p2.y) * 50.0 + (p1.y - p4.y) * 25.0 + (p5.y - p0.y) * 5.0)))))
 
     return new Point(x, y)
   }
@@ -244,12 +262,84 @@ export class Polygon {
   points!: Point[]
 
   constructor(polygon: Polygon)
-  constructor(points?: Point[])
+  constructor(points: Point[])
+  constructor(polygon: Polygon | Point[])
   constructor(polygon: Polygon | Point[] = []) {
     if (Array.isArray(polygon)) {
       this.points = polygon
     } else {
       this.points = polygon.points
     }
+  }
+
+  get length() {
+    return this.points.length
+  }
+
+  get forEach() {
+    return this.points.forEach.bind(this.points)
+  }
+
+  get slice() {
+    return this.points.slice.bind(this.points)
+  }
+
+  toSVGPath() {
+    return Polygon.toSVGPath(this.points)
+  }
+
+  screen(this: Polygon, other: Polygon): Polygon
+  screen(this: Polygon, other: Point[]): Polygon
+  screen(this: Polygon, other: Point[] | Polygon) {
+    return new Polygon(Polygon.screen(this.points, Array.isArray(other) ? other : other.points))
+  }
+
+  mag(this: Polygon) {
+    return Polygon.mag(this.points)
+  }
+
+  absSum(this: Polygon) {
+    return Polygon.absSum(this.points).absSum()
+  }
+
+  translateSelf(this: Polygon, other: Polygon): Polygon
+  translateSelf(this: Polygon, other: Point[]): Polygon
+  translateSelf(this: Polygon, other: Point[] | Polygon) {
+    const points = Array.isArray(other) ? other : other.points
+    this.points.forEach((x, i) => {
+      x.translateSelf(points[i])
+    })
+    return this
+  }
+
+  chop(this: Polygon, min: number, max: number) {
+    return new Polygon(Polygon.chop(this.points, min, max))
+  }
+
+  chopSelf(this: Polygon, min: number, max: number) {
+    this.points = Polygon.chop(this.points, min, max)
+    return this
+  }
+
+  fit(this: Polygon, length: number) {
+    return new Polygon(Polygon.fit(this.points, length))
+  }
+
+  fitSelf(this: Polygon, length: number) {
+    this.points = Polygon.fit(this.points, length)
+    return this
+  }
+
+  rope(this: Polygon, coeff: number) {
+    return new Polygon(Polygon.rope(this.points, coeff))
+  }
+
+  ropeSelf(this: Polygon, coeff: number) {
+    this.points = Polygon.rope(this.points, coeff)
+    return this
+  }
+
+  boundingRect(this: Polygon) {
+    return Polygon.boundingRect(this.points)
   }
 }

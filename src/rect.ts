@@ -7,8 +7,8 @@ import { Shape, ShapeLike } from './shape'
 export type Placement = 'nw' | 'nwr' | 'nel' | 'n' | 'ne' | 'e' | 'se' | 's' | 'sw' | 'w'
 
 export class Rect extends Shape implements DOMRect {
-  static fromElement(el: HTMLElement) {
-    return new Rect(
+  static fromElement(el: HTMLElement & { rect?: Rect }) {
+    return el.rect ? el.rect.clone() : new Rect(
       +(el.dataset.x ?? el.offsetLeft),
       +(el.dataset.y ?? el.offsetTop),
       +(el.dataset.width ?? el.offsetWidth),
@@ -56,6 +56,13 @@ export class Rect extends Shape implements DOMRect {
     )
   }
 
+  static compare(a: Rect | void, b: Rect) {
+    return a?.equals(b) ?? false
+  }
+
+  // alias
+  static boundingRect = Rect.combine
+
   x!: number
   y!: number
   width!: number
@@ -89,6 +96,10 @@ export class Rect extends Shape implements DOMRect {
     }
   }
 
+  toSVGPath() {
+    return `M ${this.x} ${this.y} h ${this.width} v ${this.height} h ${-this.width} v ${-this.height}`
+  }
+
   toString() {
     return `${this.x} ${this.y} ${this.width} ${this.height}`
   }
@@ -97,6 +108,7 @@ export class Rect extends Shape implements DOMRect {
     const div = document.createElement('div')
     Object.assign(div.style, {
       position,
+      pointerEvents: 'none',
       boxSizing: 'border-box',
       border: '1px solid ' + color,
       ...this.toStyle(),
@@ -112,6 +124,16 @@ export class Rect extends Shape implements DOMRect {
     this.width = other.width
     this.height = other.height
     this.#stale = true
+    return this
+  }
+
+  setWidth(width: number) {
+    this.width = width
+    return this
+  }
+
+  setHeight(height: number) {
+    this.height = height
     return this
   }
 

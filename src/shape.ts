@@ -58,6 +58,16 @@ export abstract class Shape {
     this.x = x
   }
 
+  setLeft(x: number) {
+    this.x = x
+    return this
+  }
+
+  setTop(y: number) {
+    this.y = y
+    return this
+  }
+
   clone(this: this) {
     const ctor = this.constructor as Class<this>
     return new ctor(this)
@@ -254,10 +264,24 @@ export abstract class Shape {
     }
   }
 
+  toStylePositionPct(): Partial<CSSStyleDeclaration> {
+    return {
+      left: this.x * 100 + '%',
+      top: this.y * 100 + '%',
+    }
+  }
+
   toStyleSize(): Partial<CSSStyleDeclaration> {
     return {
       width: this.width + 'px',
       height: this.height + 'px',
+    }
+  }
+
+  toStyleSizePct(): Partial<CSSStyleDeclaration> {
+    return {
+      width: this.width * 100 + '%',
+      height: this.height * 100 + '%',
     }
   }
 
@@ -266,6 +290,17 @@ export abstract class Shape {
       ...this.toStylePosition(),
       ...this.toStyleSize(),
     }
+  }
+
+  toStylePct(): Partial<CSSStyleDeclaration> {
+    return {
+      ...this.toStylePositionPct(),
+      ...this.toStyleSizePct(),
+    }
+  }
+
+  toCSSStyle() {
+    return Object.entries(this.toStyle()).map(([key, value]) => `${key}: ${value};`).join('\n')
   }
 
   toPositionObject() {
